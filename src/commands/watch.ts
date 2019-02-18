@@ -134,8 +134,16 @@ export const command: CommandInterface = {
       authorId: msg.author.id
     };
 
-    WatchedMessageModel.create(watchedMessage).then(() => {
-      ctx.watchedMessages.push(watchedMessage);
+    const query = {
+      guildId: watchedMessage.guildId,
+      channelId: watchedMessage.channelId,
+      messageId: watchedMessage.messageId,
+      mention: watchedMessage.mention
+    };
+
+    // TODO: eventually avoid doing a full refetch, for performance reasons
+    WatchedMessageModel.findOneAndUpdate(query, watchedMessage, { upsert: true }).then(async () => {
+      ctx.watchedMessages = await (WatchedMessageModel as any).list();
     });
   }
 };
