@@ -1,9 +1,10 @@
-import * as Discord from "discord.js";
+import { Client, Guild, GuildMember, MessageReaction, TextChannel, User } from "discord.js";
 import * as dotenv from "dotenv";
+import * as mongoose from "mongoose";
 
 dotenv.config();
 
-import { PREFIX, TOKEN } from "./config";
+import { MONGO_PATH, PREFIX, TOKEN } from "./config";
 
 import { Instance } from "./Instance";
 
@@ -12,7 +13,9 @@ import { Instance } from "./Instance";
     return console.log("TOKEN is not set.");
   }
 
-  const client = new Discord.Client({ disableEveryone: true });
+  mongoose.connect(MONGO_PATH, { useNewUrlParser: true });
+
+  const client = new Client({ disableEveryone: true });
   const instance = new Instance();
   const bot = await instance.init(client);
 
@@ -22,7 +25,40 @@ import { Instance } from "./Instance";
 
   client.on("warn", console.warn);
   client.on("error", console.error);
-  client.on("ready", () => console.log("Bot is ready!"));
+  client.on("ready", () => {
+    console.log("Bot is ready!");
+
+    // TODO: move me
+    const getGuildMember = async (guildId: Guild["id"], user: User): Promise<GuildMember> => {
+      const u = await user.fetch();
+      const guild = client.guilds.resolve(guildId);
+      return guild.members.fetch(u.id);
+    };
+
+    // TODO: move me
+    instance.watchedMessages.forEach(async message => {
+      const channel = (await client.channels.fetch(message.channelId)) as TextChannel;
+      const watched = await channel.messages.fetch(message.messageId);
+
+      const collector = watched.createReactionCollector(
+        (reaction: MessageReaction) => {
+          return reaction.emoji.name === message.mention;
+        },
+        { dispose: true }
+      );
+      collector
+        .on("collect", async (role: MessageReaction, user: User) => {
+          const member = await getGuildMember(message.guildId, user);
+          member.roles.add(message.roleId).catch(console.log);
+          console.log(`Collected ${role.emoji.name}`);
+        })
+        .on("remove", async (r: MessageReaction, user: User) => {
+          const member = await getGuildMember(message.guildId, user);
+          member.roles.remove(message.roleId).catch(console.log);
+          console.log(`Removed ${r.emoji.name}`);
+        });
+    });
+  });
   client.on("disconnect", () => console.log("Bot disconnected!"));
   client.on("reconnecting", () => console.log("Bot reconnecting!"));
 

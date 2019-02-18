@@ -16,6 +16,8 @@ Copy the `.env.example` to `.env` and set the variables
 
 ```
 TOKEN=yourbottoken
+ATLAS_USERNAME=username
+ATLAS_PASSWORD=yoursecretpassword
 ```
 
 Run the bot
