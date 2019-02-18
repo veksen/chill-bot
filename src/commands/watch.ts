@@ -1,13 +1,10 @@
 import { Message, MessageEmbed, TextChannel } from "discord.js";
 import { CommandInterface } from "../Command";
 import { WatchedMessageModel } from "../models/WatchedMessage";
+import { extractRoleId } from "../utils";
 
 const valid = (text: string) => `:white_check_mark: ${text}`;
 const invalid = (text: string) => `:x: ${text}`;
-
-const extractRoleId = (roleMention: string): string => {
-  return roleMention.replace(/\D/g, "");
-};
 
 const validateChannel = (msg: Message, channelArg: string): string => {
   if (!channelArg) {
