@@ -1,4 +1,4 @@
-import { Client, Guild, GuildMember, MessageReaction, TextChannel, User } from "discord.js";
+import { Client, Guild, GuildMember, Message, MessageReaction, TextChannel, User } from "discord.js";
 import { Instance } from "../instance";
 import { WatchedMessage, WatchedMessageModel } from "../models/WatchedMessage";
 
@@ -6,6 +6,11 @@ const getGuildMember = async (client: Client, guildId: Guild["id"], user: User):
   const u = await user.fetch();
   const guild = client.guilds.resolve(guildId);
   return guild.members.fetch(u.id);
+};
+
+const getMessageFromChannel = async (client: Client, message: WatchedMessage): Promise<Message> => {
+  const channel = (await client.channels.fetch(message.channelId)) as TextChannel;
+  return channel.messages.fetch(message.messageId);
 };
 
 export interface ReactionCollectorInterface {
@@ -50,12 +55,24 @@ export class ReactionCollector implements ReactionCollector {
       });
   }
 
+  private async addReaction(ctx: Instance, message: WatchedMessage): Promise<void> {
+    const guild = (await ctx.bot.guilds.get(message.guildId)) as Guild;
+    const watched = await getMessageFromChannel(ctx.bot, message);
+    const isCustomEmoji = message.reaction.match(/^<:.+:\d+>$/);
+    const emoji = isCustomEmoji ? guild.emojis.get(message.reaction.replace(/\D/g, "")) : message.reaction;
+    if (emoji) {
+      watched.react(emoji).catch(e => console.log);
+    } else {
+      console.log(`cannot react, ${message.reaction} is invalid`);
+    }
+  }
+
   private async setup(ctx: Instance, message: WatchedMessage): Promise<void> {
-    const channel = (await ctx.bot.channels.fetch(message.channelId)) as TextChannel;
-    const watched = await channel.messages.fetch(message.messageId);
+    const watched = await getMessageFromChannel(ctx.bot, message);
     const hasReactionByMe = watched.reactions.some(reaction => reaction.me && reaction.emoji.name === message.reaction);
+
     if (!hasReactionByMe) {
-      watched.react(message.reaction).catch(console.log);
+      this.addReaction(ctx, message);
     }
     const collector = watched.createReactionCollector(
       (reaction: MessageReaction) => {
