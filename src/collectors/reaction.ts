@@ -13,7 +13,7 @@ const getMessageFromChannel = async (client: Client, message: WatchedMessage): P
   return channel.messages.fetch(message.messageId);
 };
 
-export class ReactionCollector {
+export class ReactionCollectorWrapper {
   private watched: WatchedMessage[] = [];
 
   public async init(ctx: Instance): Promise<void> {
