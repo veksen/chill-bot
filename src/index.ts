@@ -6,7 +6,6 @@ dotenv.config();
 
 import { MONGO_PATH, PREFIX, TOKEN } from "./config";
 
-import { ReactionCollector } from "./collectors/reaction";
 import { Instance } from "./Instance";
 
 (async () => {
@@ -28,7 +27,7 @@ import { Instance } from "./Instance";
   client.on("error", console.error);
   client.on("ready", () => {
     console.log("Bot is ready!");
-    new ReactionCollector().init(instance);
+    bot.reactionCollector.init(bot);
   });
   client.on("disconnect", () => console.log("Bot disconnected!"));
   client.on("reconnecting", () => console.log("Bot reconnecting!"));

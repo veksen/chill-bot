@@ -1,5 +1,6 @@
 import { Client, Guild, GuildMember, MessageReaction, TextChannel, User } from "discord.js";
 import { Instance } from "../instance";
+import { WatchedMessage, WatchedMessageModel } from "../models/WatchedMessage";
 
 const getGuildMember = async (client: Client, guildId: Guild["id"], user: User): Promise<GuildMember> => {
   const u = await user.fetch();
@@ -12,8 +13,11 @@ export interface ReactionCollectorInterface {
 }
 
 export class ReactionCollector implements ReactionCollector {
-  public init(ctx: Instance): void {
-    ctx.watchedMessages.forEach(async message => {
+  private watched: WatchedMessage[] = [];
+
+  public async init(ctx: Instance): Promise<void> {
+    this.watched = await (WatchedMessageModel as any).list();
+    this.watched.forEach(async message => {
       const channel = (await ctx.bot.channels.fetch(message.channelId)) as TextChannel;
       const watched = await channel.messages.fetch(message.messageId);
       const hasReactionByMe = watched.reactions.some(
@@ -39,6 +43,27 @@ export class ReactionCollector implements ReactionCollector {
           member.roles.remove(message.roleId).catch(console.log);
           console.log(`Removed ${r.emoji.name}`);
         });
+    });
+  }
+
+  public add(message: {
+    guildId: string;
+    channelId: string;
+    messageId: string;
+    reaction: string;
+    roleId: string;
+    authorId: string;
+  }): void {
+    const query = {
+      guildId: message.guildId,
+      channelId: message.channelId,
+      messageId: message.messageId,
+      reaction: message.reaction
+    };
+
+    // TODO: eventually avoid doing a full refetch, for performance reasons
+    WatchedMessageModel.findOneAndUpdate(query, message, { upsert: true }).then(async () => {
+      this.watched = await (WatchedMessageModel as any).list();
     });
   }
 }

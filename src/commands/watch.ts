@@ -1,6 +1,5 @@
 import { Message, MessageEmbed, TextChannel } from "discord.js";
 import { CommandInterface } from "../Command";
-import { WatchedMessageModel } from "../models/WatchedMessage";
 import { extractRoleId } from "../utils";
 
 const valid = (text: string) => `:white_check_mark: ${text}`;
@@ -125,25 +124,13 @@ export const command: CommandInterface = {
     const reaction = args[2];
     const role: string = args[3];
 
-    const watchedMessage = {
+    ctx.reactionCollector.add({
       guildId: msg.guild.id,
       channelId,
       messageId,
       reaction,
       roleId: extractRoleId(role),
       authorId: msg.author.id
-    };
-
-    const query = {
-      guildId: watchedMessage.guildId,
-      channelId: watchedMessage.channelId,
-      messageId: watchedMessage.messageId,
-      reaction: watchedMessage.reaction
-    };
-
-    // TODO: eventually avoid doing a full refetch, for performance reasons
-    WatchedMessageModel.findOneAndUpdate(query, watchedMessage, { upsert: true }).then(async () => {
-      ctx.watchedMessages = await (WatchedMessageModel as any).list();
     });
   }
 };
