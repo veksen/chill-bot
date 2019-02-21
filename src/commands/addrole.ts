@@ -66,7 +66,7 @@ const validateRole = async (msg: Message, roleArg: string): Promise<string> => {
 };
 
 export const command: CommandInterface = {
-  name: "watch",
+  name: "addrole",
   aliases: [],
 
   check: async (_, msg, args = []) => {
@@ -117,7 +117,7 @@ export const command: CommandInterface = {
   run: async (ctx, msg, args): Promise<void> => {
     await command.check(ctx, msg, args);
 
-    console.log("ran watch");
+    console.log("ran addrole");
 
     const channelId = args[0];
     const messageId = args[1];
