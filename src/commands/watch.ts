@@ -35,20 +35,20 @@ const validateMessage = (msg: Message, channelArg: string, messageArg: string): 
   return valid(`Found message \`${messageArg}\``);
 };
 
-const validateMention = async (msg: Message, mentionArg: string): Promise<string> => {
-  if (!mentionArg) {
-    return invalid("Please provide a emoji/mention, like :+1:");
+const validateReaction = async (msg: Message, reactionArg: string): Promise<string> => {
+  if (!reactionArg) {
+    return invalid("Please provide a emoji/reaction, like :+1:");
   }
 
-  const emoji = await (msg.channel as TextChannel).guild.emojis.resolveIdentifier(mentionArg);
+  const emoji = await (msg.channel as TextChannel).guild.emojis.resolveIdentifier(reactionArg);
 
   // TODO: make sure this properly work - is it even necessary?
   if (!emoji) {
-    return invalid(`Could not find emoji/mention \`${mentionArg}\`,
+    return invalid(`Could not find emoji/reaction \`${reactionArg}\`,
     is it available to the server?`);
   }
 
-  return valid(`Found emoji/mention \`${mentionArg}\``);
+  return valid(`Found emoji/reaction \`${reactionArg}\``);
 };
 
 const validateRole = async (msg: Message, roleArg: string): Promise<string> => {
@@ -95,8 +95,8 @@ export const command: CommandInterface = {
         value: validateMessage(msg, args[0], args[1])
       },
       {
-        name: "3- Mention",
-        value: await validateMention(msg, args[2])
+        name: "3- Reaction",
+        value: await validateReaction(msg, args[2])
       },
       {
         name: "4- Role",
@@ -122,14 +122,14 @@ export const command: CommandInterface = {
 
     const channelId = args[0];
     const messageId = args[1];
-    const mention = args[2];
+    const reaction = args[2];
     const role: string = args[3];
 
     const watchedMessage = {
       guildId: msg.guild.id,
       channelId,
       messageId,
-      mention,
+      reaction,
       roleId: extractRoleId(role),
       authorId: msg.author.id
     };
@@ -138,7 +138,7 @@ export const command: CommandInterface = {
       guildId: watchedMessage.guildId,
       channelId: watchedMessage.channelId,
       messageId: watchedMessage.messageId,
-      mention: watchedMessage.mention
+      reaction: watchedMessage.reaction
     };
 
     // TODO: eventually avoid doing a full refetch, for performance reasons

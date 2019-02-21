@@ -5,7 +5,7 @@ export interface WatchedMessage {
   guildId: string;
   channelId: string;
   messageId: string;
-  mention: string;
+  reaction: string;
   roleId: string;
   authorId: string;
 }
@@ -20,7 +20,7 @@ const WatchedMessageSchema: mongoose.Schema = new Schema(
     guildId: String,
     channelId: String,
     messageId: String,
-    mention: String,
+    reaction: String,
     roleId: String,
     authorId: String
   },

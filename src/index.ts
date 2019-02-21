@@ -40,13 +40,16 @@ import { Instance } from "./Instance";
       const channel = (await client.channels.fetch(message.channelId)) as TextChannel;
       const watched = await channel.messages.fetch(message.messageId);
 
-      if (!watched.reactions.has(message.mention)) {
-        watched.react(message.mention).catch(console.log);
+      const hasReactionByMe = watched.reactions.some(
+        reaction => reaction.me && reaction.emoji.name === message.reaction
+      );
+      if (!hasReactionByMe) {
+        watched.react(message.reaction).catch(console.log);
       }
 
       const collector = watched.createReactionCollector(
         (reaction: MessageReaction) => {
-          return reaction.emoji.name === message.mention;
+          return reaction.emoji.name === message.reaction;
         },
         { dispose: true }
       );
