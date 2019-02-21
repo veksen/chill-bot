@@ -124,7 +124,7 @@ export const command: CommandInterface = {
     const reaction = args[2];
     const role: string = args[3];
 
-    ctx.reactionCollector.add({
+    ctx.reactionCollector.add(ctx, {
       guildId: msg.guild.id,
       channelId,
       messageId,

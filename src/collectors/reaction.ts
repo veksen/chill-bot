@@ -18,42 +18,21 @@ export class ReactionCollector implements ReactionCollector {
   public async init(ctx: Instance): Promise<void> {
     this.watched = await (WatchedMessageModel as any).list();
     this.watched.forEach(async message => {
-      const channel = (await ctx.bot.channels.fetch(message.channelId)) as TextChannel;
-      const watched = await channel.messages.fetch(message.messageId);
-      const hasReactionByMe = watched.reactions.some(
-        reaction => reaction.me && reaction.emoji.name === message.reaction
-      );
-      if (!hasReactionByMe) {
-        watched.react(message.reaction).catch(console.log);
-      }
-      const collector = watched.createReactionCollector(
-        (reaction: MessageReaction) => {
-          return reaction.emoji.name === message.reaction;
-        },
-        { dispose: true }
-      );
-      collector
-        .on("collect", async (role: MessageReaction, user: User) => {
-          const member = await getGuildMember(ctx.bot, message.guildId, user);
-          member.roles.add(message.roleId).catch(console.log);
-          console.log(`Collected ${role.emoji.name}`);
-        })
-        .on("remove", async (r: MessageReaction, user: User) => {
-          const member = await getGuildMember(ctx.bot, message.guildId, user);
-          member.roles.remove(message.roleId).catch(console.log);
-          console.log(`Removed ${r.emoji.name}`);
-        });
+      this.setup(ctx, message);
     });
   }
 
-  public add(message: {
-    guildId: string;
-    channelId: string;
-    messageId: string;
-    reaction: string;
-    roleId: string;
-    authorId: string;
-  }): void {
+  public add(
+    ctx: Instance,
+    message: {
+      guildId: string;
+      channelId: string;
+      messageId: string;
+      reaction: string;
+      roleId: string;
+      authorId: string;
+    }
+  ): void {
     const query = {
       guildId: message.guildId,
       channelId: message.channelId,
@@ -62,8 +41,38 @@ export class ReactionCollector implements ReactionCollector {
     };
 
     // TODO: eventually avoid doing a full refetch, for performance reasons
-    WatchedMessageModel.findOneAndUpdate(query, message, { upsert: true }).then(async () => {
-      this.watched = await (WatchedMessageModel as any).list();
-    });
+    WatchedMessageModel.findOneAndUpdate(query, message, { upsert: true })
+      .then(async () => {
+        this.watched = await (WatchedMessageModel as any).list();
+      })
+      .then(() => {
+        this.setup(ctx, message);
+      });
+  }
+
+  private async setup(ctx: Instance, message: WatchedMessage): Promise<void> {
+    const channel = (await ctx.bot.channels.fetch(message.channelId)) as TextChannel;
+    const watched = await channel.messages.fetch(message.messageId);
+    const hasReactionByMe = watched.reactions.some(reaction => reaction.me && reaction.emoji.name === message.reaction);
+    if (!hasReactionByMe) {
+      watched.react(message.reaction).catch(console.log);
+    }
+    const collector = watched.createReactionCollector(
+      (reaction: MessageReaction) => {
+        return reaction.emoji.name === message.reaction;
+      },
+      { dispose: true }
+    );
+    collector
+      .on("collect", async (role: MessageReaction, user: User) => {
+        const member = await getGuildMember(ctx.bot, message.guildId, user);
+        member.roles.add(message.roleId).catch(console.log);
+        console.log(`Collected ${role.emoji.name}`);
+      })
+      .on("remove", async (r: MessageReaction, user: User) => {
+        const member = await getGuildMember(ctx.bot, message.guildId, user);
+        member.roles.remove(message.roleId).catch(console.log);
+        console.log(`Removed ${r.emoji.name}`);
+      });
   }
 }
