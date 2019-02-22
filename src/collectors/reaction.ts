@@ -71,10 +71,9 @@ export class ReactionCollectorWrapper {
       throw new Error(`no match for ${message.id}`);
     }
 
-    WatchedMessageModel.deleteOne(query).then(() => {
-      this.watched = [...this.watched.filter(m => m.id !== toRemove.id)];
-      this.unsetup(ctx, toRemove);
-    });
+    await WatchedMessageModel.deleteOne(query);
+    this.watched = [...this.watched.filter(m => m.id !== toRemove.id)];
+    this.unsetup(ctx, toRemove);
   }
 
   private async addReaction(ctx: Instance, message: WatchedMessageDocument): Promise<void> {
