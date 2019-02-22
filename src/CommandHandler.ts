@@ -23,7 +23,7 @@ export class CommandHandler implements CommandHandlerInterface {
         throw new Error("Something wrong happened");
       }
 
-      this.commands = commands.map(command => require("../" + command).command);
+      this.commands = commands.map(command => new (require("../" + command)).Command());
     });
 
     return this;

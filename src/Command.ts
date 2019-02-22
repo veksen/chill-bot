@@ -4,17 +4,17 @@ import { Instance } from "./instance";
 export interface CommandInterface {
   name: string;
   aliases: string[];
-  run: (ctx: Instance, msg: Message, args: string[]) => void;
-  check: (ctx: Instance, msg?: Message, args?: string[]) => void;
-  guard: (ctx: Instance, msg?: Message, args?: string[]) => void;
+  run: (ctx: Instance, msg: Message, args: string[]) => Promise<void>;
+  check: (ctx: Instance, msg: Message, args: string[]) => Promise<void>;
+  guard: (ctx: Instance, msg: Message, args: string[]) => Promise<void>;
 }
 
 export class Command implements CommandInterface {
   public name: string;
   public aliases: string[] = [];
-  public run: (ctx: Instance, msg: Message, args: string[]) => void;
-  public check: (ctx: Instance, msg?: Message, args?: string[]) => void;
-  public guard: (ctx: Instance, msg?: Message, args?: string[]) => void;
+  public run: (ctx: Instance, msg: Message, args: string[]) => Promise<void>;
+  public check: (ctx: Instance, msg: Message, args: string[]) => Promise<void>;
+  public guard: (ctx: Instance, msg: Message, args: string[]) => Promise<void>;
 
   constructor(command: CommandInterface) {
     this.name = command.name;

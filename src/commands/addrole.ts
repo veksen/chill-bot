@@ -1,5 +1,6 @@
 import { Message, MessageEmbed, TextChannel } from "discord.js";
 import { CommandInterface } from "../Command";
+import { Instance } from "../instance";
 import { extractRoleId } from "../utils";
 
 const valid = (text: string) => `:white_check_mark: ${text}`;
@@ -65,11 +66,11 @@ const validateRole = async (msg: Message, roleArg: string): Promise<string> => {
   return valid(`Found role \`${roleArg}\``);
 };
 
-export const command: CommandInterface = {
-  name: "addrole",
-  aliases: [],
+export class Command implements CommandInterface {
+  public name = "addrole";
+  public aliases = [];
 
-  check: async (_, msg, args = []) => {
+  public async check(_: Instance, msg: Message, args: string[]): Promise<void> {
     if (!msg) {
       return;
     }
@@ -108,14 +109,14 @@ export const command: CommandInterface = {
         fields: [...headerField, ...validatedFields]
       })
     );
-  },
+  }
 
-  guard: () => {
+  public async guard(): Promise<void> {
     //
-  },
+  }
 
-  run: async (ctx, msg, args): Promise<void> => {
-    await command.check(ctx, msg, args);
+  public async run(ctx: Instance, msg: Message, args: string[]): Promise<void> {
+    await this.check(ctx, msg, args);
 
     console.log("ran addrole");
 
@@ -133,4 +134,4 @@ export const command: CommandInterface = {
       authorId: msg.author.id
     });
   }
-};
+}
