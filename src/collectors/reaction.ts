@@ -47,11 +47,10 @@ export class ReactionCollectorWrapper {
       reaction: message.reaction
     };
 
-    // TODO: eventually avoid doing a full refetch, for performance reasons
     const result = await WatchedMessageModel.findOneAndUpdate(query, message, { upsert: true, new: true });
-    this.watched = await (WatchedMessageModel as any).list();
 
     if (result) {
+      this.watched = [...this.watched, result];
       this.setup(ctx, result);
     }
   }
@@ -66,18 +65,14 @@ export class ReactionCollectorWrapper {
       _id: message.id
     };
 
-    const toRemove = await WatchedMessageModel.findOne(query).catch(e => {
-      console.log(`no match for ${message.id}`);
-      throw e;
-    });
+    const toRemove = await WatchedMessageModel.findOne(query);
 
     if (!toRemove) {
       throw new Error(`no match for ${message.id}`);
     }
 
-    // TODO: eventually avoid doing a full refetch, for performance reasons
-    WatchedMessageModel.deleteOne(query).then(async () => {
-      this.watched = await (WatchedMessageModel as any).list();
+    WatchedMessageModel.deleteOne(query).then(() => {
+      this.watched = [...this.watched.filter(m => m.id !== toRemove.id)];
       this.unsetup(ctx, toRemove);
     });
   }
