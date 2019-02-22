@@ -27,14 +27,16 @@ const WatchedMessageSchema: mongoose.Schema = new Schema(
   { timestamps: true }
 );
 
-WatchedMessageSchema.static("get", async function(id: string): Promise<WatchedMessage> {
-  return this.findById(id).exec();
-});
+WatchedMessageSchema.statics = {
+  async get(id: string): Promise<WatchedMessage> {
+    return this.findById(id).exec();
+  },
 
-WatchedMessageSchema.static("list", async function(): Promise<WatchedMessage[]> {
-  return this.find({})
-    .sort({ createdAt: -1 })
-    .exec();
-});
+  async list(): Promise<WatchedMessage[]> {
+    return this.find({})
+      .sort({ createdAt: -1 })
+      .exec();
+  }
+};
 
 export const WatchedMessageModel = mongoose.model<WatchedMessageDocument>("WatchedMessage", WatchedMessageSchema);
