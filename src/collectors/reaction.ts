@@ -29,7 +29,7 @@ export class ReactionCollectorWrapper {
     });
   }
 
-  public add(
+  public async add(
     ctx: Instance,
     message: {
       guildId: string;
@@ -39,7 +39,7 @@ export class ReactionCollectorWrapper {
       roleId: string;
       authorId: string;
     }
-  ): void {
+  ): Promise<void> {
     const query = {
       guildId: message.guildId,
       channelId: message.channelId,
@@ -48,13 +48,12 @@ export class ReactionCollectorWrapper {
     };
 
     // TODO: eventually avoid doing a full refetch, for performance reasons
-    WatchedMessageModel.findOneAndUpdate(query, message, { upsert: true }).then(async result => {
-      this.watched = await (WatchedMessageModel as any).list();
+    const result = await WatchedMessageModel.findOneAndUpdate(query, message, { upsert: true, new: true });
+    this.watched = await (WatchedMessageModel as any).list();
 
-      if (result) {
-        this.setup(ctx, result);
-      }
-    });
+    if (result) {
+      this.setup(ctx, result);
+    }
   }
 
   public async remove(
