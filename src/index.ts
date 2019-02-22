@@ -12,6 +12,9 @@ import { Instance } from "./Instance";
   if (!TOKEN) {
     return console.log("TOKEN is not set.");
   }
+  if (!MONGO_PATH) {
+    return console.log("MONGO_PATH is not set.");
+  }
 
   mongoose.connect(MONGO_PATH, { useNewUrlParser: true });
 
