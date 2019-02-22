@@ -1,12 +1,10 @@
-import { Message, MessageEmbed } from "discord.js";
+import { EmbedField, Message, MessageEmbed } from "discord.js";
 import { CommandInterface } from "../Command";
 import { Instance } from "../instance";
 import { WatchedMessageModel } from "../models/WatchedMessage";
+import { ConditionValidity, invalid, valid } from "../utils";
 
-const valid = (text: string) => ({ valid: true, message: `:white_check_mark: ${text}` });
-const invalid = (text: string) => ({ valid: false, message: `:x: ${text}` });
-
-const validateId = async (_: Message, idArg: string): Promise<{ valid: boolean; message: string }> => {
+const validateId = async (_: Message, idArg: string): Promise<ConditionValidity> => {
   if (!idArg) {
     return invalid("Please provide an id");
   }
@@ -25,7 +23,10 @@ export class Command implements CommandInterface {
   public aliases = ["deleterole"];
 
   public async run(ctx: Instance, msg: Message, args: string[]): Promise<void> {
-    await this.check(ctx, msg, args);
+    const isValid = await this.check(ctx, msg, args);
+    if (!isValid) {
+      return;
+    }
 
     console.log("ran removerole");
 
@@ -38,20 +39,33 @@ export class Command implements CommandInterface {
       .catch(console.log);
   }
 
-  public async check(_: Instance, msg: Message, args: string[]): Promise<void> {
+  public async check(_: Instance, msg: Message, args: string[]): Promise<boolean> {
     if (!msg) {
-      return;
+      return false;
     }
 
-    const headerField =
-      args.length !== 1
-        ? [
-            {
-              name: "Invalid",
-              value: "This command requires 1 argument"
-            }
-          ]
-        : [];
+    const validations = {
+      id: await validateId(msg, args[0])
+    };
+
+    const isValid = [validations.id.valid].every(cond => cond);
+
+    let headerField: EmbedField[] = [];
+    if (args.length !== 1) {
+      headerField = [
+        {
+          name: "Invalid",
+          value: "This command requires 1 arguments"
+        }
+      ];
+    } else if (!isValid) {
+      headerField = [
+        {
+          name: "Invalid",
+          value: "Invalid arguments, validate below"
+        }
+      ];
+    }
 
     const validatedFields = [
       {
@@ -65,6 +79,8 @@ export class Command implements CommandInterface {
         fields: [...headerField, ...validatedFields]
       })
     );
+
+    return isValid;
   }
 
   public async guard(): Promise<void> {

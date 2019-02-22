@@ -1,12 +1,9 @@
-import { Message, MessageEmbed, TextChannel } from "discord.js";
+import { EmbedField, Message, MessageEmbed, TextChannel } from "discord.js";
 import { CommandInterface } from "../Command";
 import { Instance } from "../instance";
-import { extractRoleId } from "../utils";
+import { ConditionValidity, extractRoleId, invalid, valid } from "../utils";
 
-const valid = (text: string) => `:white_check_mark: ${text}`;
-const invalid = (text: string) => `:x: ${text}`;
-
-const validateChannel = (msg: Message, channelArg: string): string => {
+const validateChannel = (msg: Message, channelArg: string): ConditionValidity => {
   if (!channelArg) {
     return invalid("Please provide a channel id");
   }
@@ -20,7 +17,7 @@ const validateChannel = (msg: Message, channelArg: string): string => {
   return valid(`Found channel \`${channelArg}\``);
 };
 
-const validateMessage = (msg: Message, channelArg: string, messageArg: string): string => {
+const validateMessage = (msg: Message, channelArg: string, messageArg: string): ConditionValidity => {
   if (!channelArg || !messageArg) {
     return invalid("Please provide a message id");
   }
@@ -35,7 +32,7 @@ const validateMessage = (msg: Message, channelArg: string, messageArg: string): 
   return valid(`Found message \`${messageArg}\``);
 };
 
-const validateReaction = async (msg: Message, reactionArg: string): Promise<string> => {
+const validateReaction = async (msg: Message, reactionArg: string): Promise<ConditionValidity> => {
   if (!reactionArg) {
     return invalid("Please provide a emoji/reaction, like :+1:");
   }
@@ -51,7 +48,7 @@ const validateReaction = async (msg: Message, reactionArg: string): Promise<stri
   return valid(`Found emoji/reaction \`${reactionArg}\``);
 };
 
-const validateRole = async (msg: Message, roleArg: string): Promise<string> => {
+const validateRole = async (msg: Message, roleArg: string): Promise<ConditionValidity> => {
   if (!roleArg) {
     return invalid("Please mention a role, `@somerole`");
   }
@@ -70,37 +67,58 @@ export class Command implements CommandInterface {
   public name = "addrole";
   public aliases = [];
 
-  public async check(_: Instance, msg: Message, args: string[]): Promise<void> {
+  public async check(_: Instance, msg: Message, args: string[]): Promise<boolean> {
     if (!msg) {
-      return;
+      return false;
     }
 
-    const headerField =
-      args.length !== 4
-        ? [
-            {
-              name: "Invalid",
-              value: "This command requires 4 arguments"
-            }
-          ]
-        : [];
+    const validations = {
+      channel: validateChannel(msg, args[0]),
+      message: validateMessage(msg, args[0], args[1]),
+      reaction: await validateReaction(msg, args[2]),
+      role: await validateRole(msg, args[3])
+    };
 
-    const validatedFields = [
+    const isValid = [
+      validations.channel.valid,
+      validations.channel.valid,
+      validations.reaction.valid,
+      validations.role.valid
+    ].every(cond => cond);
+
+    let headerField: EmbedField[] = [];
+    if (args.length !== 4) {
+      headerField = [
+        {
+          name: "Invalid",
+          value: "This command requires 4 arguments"
+        }
+      ];
+    } else if (!isValid) {
+      headerField = [
+        {
+          name: "Invalid",
+          value: "Invalid arguments, validate below"
+        }
+      ];
+    }
+
+    const validatedFields: EmbedField[] = [
       {
         name: "1- Channel",
-        value: validateChannel(msg, args[0])
+        value: validations.channel.message
       },
       {
         name: "2- Message",
-        value: validateMessage(msg, args[0], args[1])
+        value: validations.channel.message
       },
       {
         name: "3- Reaction",
-        value: await validateReaction(msg, args[2])
+        value: validations.reaction.message
       },
       {
         name: "4- Role",
-        value: await validateRole(msg, args[3])
+        value: validations.role.message
       }
     ];
 
@@ -109,6 +127,8 @@ export class Command implements CommandInterface {
         fields: [...headerField, ...validatedFields]
       })
     );
+
+    return isValid;
   }
 
   public async guard(): Promise<void> {
@@ -116,7 +136,10 @@ export class Command implements CommandInterface {
   }
 
   public async run(ctx: Instance, msg: Message, args: string[]): Promise<void> {
-    await this.check(ctx, msg, args);
+    const isValid = await this.check(ctx, msg, args);
+    if (!isValid) {
+      return;
+    }
 
     console.log("ran addrole");
 
