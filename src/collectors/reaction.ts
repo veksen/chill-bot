@@ -18,7 +18,7 @@ interface KeyedReactionCollector {
   collector: ReactionCollector;
 }
 
-export class ReactionCollectorWrapper {
+export class ReactionCollectorHelper {
   private watched: WatchedMessageDocument[] = [];
   private collectors: KeyedReactionCollector[] = [];
 
