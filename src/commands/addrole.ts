@@ -81,7 +81,7 @@ export class Command implements CommandInterface {
 
     const isValid = [
       validations.channel.valid,
-      validations.channel.valid,
+      validations.message.valid,
       validations.reaction.valid,
       validations.role.valid
     ].every(cond => cond);
@@ -110,7 +110,7 @@ export class Command implements CommandInterface {
       },
       {
         name: "2- Message",
-        value: validations.channel.message
+        value: validations.message.message
       },
       {
         name: "3- Reaction",
