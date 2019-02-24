@@ -2,6 +2,10 @@ export const extractRoleId = (roleMention: string): string => {
   return roleMention.replace(/\D/g, "");
 };
 
+export const isChannelMention = (maybeChannelMention: string): boolean => {
+  return Boolean(maybeChannelMention.match(/^<#\d+>$/));
+};
+
 interface BaseConditionValidity {
   message: string;
 }

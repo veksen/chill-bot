@@ -1,20 +1,32 @@
-import { EmbedField, Message, MessageEmbed, TextChannel } from "discord.js";
+import { EmbedField, GuildChannel, Message, MessageEmbed, TextChannel } from "discord.js";
 import { CommandInterface } from "../Command";
 import { Instance } from "../instance";
-import { ConditionValidity, extractRoleId, invalid, valid } from "../utils";
+import { ConditionValidity, extractRoleId, invalid, isChannelMention, valid } from "../utils";
+
+const getChannel = (msg: Message, channelArg: string): TextChannel => {
+  const findByNameOrId = (c: GuildChannel) => {
+    if (isChannelMention(channelArg) && msg.mentions.channels.first()) {
+      return c.name === (msg.mentions.channels.first() as TextChannel).name;
+    }
+
+    return c.id === channelArg;
+  };
+
+  return (msg.channel as TextChannel).guild.channels.find(findByNameOrId) as TextChannel;
+};
 
 const validateChannel = (msg: Message, channelArg: string): ConditionValidity => {
   if (!channelArg) {
-    return invalid("Please provide a channel id");
+    return invalid("Please mention a channel, or provide a channel id");
   }
 
-  const channel = (msg.channel as TextChannel).guild.channels.has(channelArg);
+  const channel = getChannel(msg, channelArg);
 
   if (!channel) {
     return invalid(`Could not find channel \`${channelArg}\``);
   }
 
-  return valid(`Found channel \`${channelArg}\``);
+  return valid(`Found channel <#${channel.id}>`);
 };
 
 const validateMessage = (msg: Message, channelArg: string, messageArg: string): ConditionValidity => {
@@ -22,7 +34,7 @@ const validateMessage = (msg: Message, channelArg: string, messageArg: string): 
     return invalid("Please provide a message id");
   }
 
-  const channel = (msg.channel as TextChannel).guild.channels.get(channelArg) as TextChannel;
+  const channel = getChannel(msg, channelArg);
   const message = channel.messages.fetch(messageArg);
 
   if (!message) {
