@@ -29,19 +29,24 @@ const validateChannel = (msg: Message, channelArg: string): ConditionValidity =>
   return valid(`Found channel <#${channel.id}>`);
 };
 
-const validateMessage = (msg: Message, channelArg: string, messageArg: string): ConditionValidity => {
+const validateMessage = async (msg: Message, channelArg: string, messageArg: string): Promise<ConditionValidity> => {
   if (!channelArg || !messageArg) {
     return invalid("Please provide a message id");
   }
 
   const channel = getChannel(msg, channelArg);
-  const message = channel.messages.fetch(messageArg);
 
-  if (!message) {
-    return invalid(`Could not find message \`${messageArg}\``);
+  try {
+    await channel.messages.fetch(messageArg);
+
+    return valid(`Found message \`${messageArg}\``);
+  } catch (e) {
+    if (channel) {
+      return invalid(`Could not find message id \`${messageArg}\` in <#${channel.id}>`);
+    }
+
+    return invalid(`Could not find message id \`${messageArg}\``);
   }
-
-  return valid(`Found message \`${messageArg}\``);
 };
 
 const validateReaction = async (msg: Message, reactionArg: string): Promise<ConditionValidity> => {
@@ -86,7 +91,7 @@ export class Command implements CommandInterface {
 
     const validations = {
       channel: validateChannel(msg, args[0]),
-      message: validateMessage(msg, args[0], args[1]),
+      message: await validateMessage(msg, args[0], args[1]),
       reaction: await validateReaction(msg, args[2]),
       role: await validateRole(msg, args[3])
     };
