@@ -1,7 +1,7 @@
 import { EmbedField, GuildChannel, Message, MessageEmbed, TextChannel } from "discord.js";
 import { CommandInterface } from "../Command";
 import { Instance } from "../instance";
-import { ConditionValidity, extractRoleId, invalid, isChannelMention, valid } from "../utils";
+import { ConditionValidity, extractIdFromMention, invalid, isChannelMention, valid } from "../utils";
 
 const getChannel = (msg: Message, channelArg: string): TextChannel => {
   const findByNameOrId = (c: GuildChannel) => {
@@ -70,7 +70,7 @@ const validateRole = async (msg: Message, roleArg: string): Promise<ConditionVal
     return invalid("Please mention a role, `@somerole`");
   }
 
-  const roleId = extractRoleId(roleArg);
+  const roleId = extractIdFromMention(roleArg);
   const role = await (msg.channel as TextChannel).guild.roles.fetch(roleId);
 
   if (!role || !roleId) {
@@ -160,17 +160,17 @@ export class Command implements CommandInterface {
 
     console.log("ran addrole");
 
-    const channelId = args[0];
+    const channel = args[0];
     const messageId = args[1];
     const reaction = args[2];
     const role: string = args[3];
 
     await ctx.reactionCollector.add(ctx, {
       guildId: msg.guild.id,
-      channelId,
+      channelId: extractIdFromMention(channel),
       messageId,
       reaction,
-      roleId: extractRoleId(role),
+      roleId: extractIdFromMention(role),
       authorId: msg.author.id
     });
   }

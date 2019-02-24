@@ -1,5 +1,5 @@
-export const extractRoleId = (roleMention: string): string => {
-  return roleMention.replace(/\D/g, "");
+export const extractIdFromMention = (mention: string): string => {
+  return mention.replace(/\D/g, "");
 };
 
 export const isChannelMention = (maybeChannelMention: string): boolean => {
