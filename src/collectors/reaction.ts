@@ -83,7 +83,7 @@ export class ReactionCollectorHelper {
   }
 
   private async addReaction(ctx: Instance, message: WatchedMessageDocument): Promise<void> {
-    const guild = (await ctx.bot.guilds.get(message.guildId)) as Guild;
+    const guild = ctx.bot.guilds.get(message.guildId) as Guild;
     const watched = await getMessageFromChannel(ctx.bot, message).catch(console.log);
     if (!watched) {
       return;
@@ -98,7 +98,7 @@ export class ReactionCollectorHelper {
   }
 
   private async removeReaction(ctx: Instance, message: WatchedMessageDocument): Promise<void> {
-    const guild = (await ctx.bot.guilds.get(message.guildId)) as Guild;
+    const guild = ctx.bot.guilds.get(message.guildId) as Guild;
     const watched = await getMessageFromChannel(ctx.bot, message).catch(console.log);
     if (!watched) {
       return;
