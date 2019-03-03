@@ -20,7 +20,7 @@ import { Instance } from "./Instance";
 
   const client = new Client({ disableEveryone: true });
   const instance = new Instance();
-  const bot = await instance.init(client);
+  const bot = await instance.init(client).catch(console.log);
 
   if (!bot) {
     return console.log("Something wrong happened");
@@ -30,7 +30,7 @@ import { Instance } from "./Instance";
   client.on("error", console.error);
   client.on("ready", () => {
     console.log("Bot is ready!");
-    bot.reactionCollector.init(bot);
+    bot.reactionCollector.init(bot).catch(console.log);
   });
   client.on("disconnect", () => console.log("Bot disconnected!"));
   client.on("reconnecting", () => console.log("Bot reconnecting!"));
