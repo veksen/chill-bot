@@ -1,0 +1,8 @@
+version: "3"
+services:
+  dev:
+    image: node:carbon
+    volumes:
+      - .:/src
+    working_dir: /src
+    command: yarn prod
