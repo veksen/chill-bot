@@ -1,6 +1,6 @@
 import { EmbedField, Message, MessageEmbed } from "discord.js";
 import { CommandInterface } from "../Command";
-import { Instance } from "../instance";
+import { Instance } from "../Instance";
 import { WatchedMessageModel } from "../models/WatchedMessage";
 import { ConditionValidity, invalid, valid } from "../utils";
 

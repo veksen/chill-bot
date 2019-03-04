@@ -1,6 +1,6 @@
 import { EmbedField, GuildChannel, Message, MessageEmbed, TextChannel } from "discord.js";
 import { CommandInterface } from "../Command";
-import { Instance } from "../instance";
+import { Instance } from "../Instance";
 import { ConditionValidity, extractIdFromMention, invalid, isChannelMention, valid } from "../utils";
 
 const getChannel = (msg: Message, channelArg: string): TextChannel => {

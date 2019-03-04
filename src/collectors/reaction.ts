@@ -1,5 +1,5 @@
 import { Client, Guild, GuildMember, Message, MessageReaction, ReactionCollector, TextChannel, User } from "discord.js";
-import { Instance } from "../instance";
+import { Instance } from "../Instance";
 import { WatchedMessageDocument, WatchedMessageModel } from "../models/WatchedMessage";
 
 const getGuildMember = async (client: Client, guildId: Guild["id"], user: User): Promise<GuildMember | void> => {

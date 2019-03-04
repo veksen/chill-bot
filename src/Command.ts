@@ -1,5 +1,5 @@
 import { Message } from "discord.js";
-import { Instance } from "./instance";
+import { Instance } from "./Instance";
 
 export interface CommandInterface {
   name: string;
