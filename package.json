@@ -7,8 +7,7 @@
     "build": "tsc",
     "prod": "NODE_ENV=production && tsc && node ./dist/index.js",
     "dev": "NODE_ENV=development && nodemon",
-    "test": "",
-    "heroku-postbuild": "echo Skip build on Heroku"
+    "test": ""
   },
   "keywords": [
     "discord",
