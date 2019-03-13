@@ -83,13 +83,19 @@ const validateRole = async (msg: Message, roleArg: string): Promise<ConditionVal
 export class Command implements CommandInterface {
   public name = "addrole";
   public aliases = [];
+  private validations: { [name: string]: ConditionValidity } = {
+    channel: { valid: false, message: "" },
+    message: { valid: false, message: "" },
+    reaction: { valid: false, message: "" },
+    role: { valid: false, message: "" }
+  };
 
   public async check(_: Instance, msg: Message, args: string[]): Promise<boolean> {
     if (!msg) {
       return false;
     }
 
-    const validations = {
+    this.validations = {
       channel: validateChannel(msg, args[0]),
       message: await validateMessage(msg, args[0], args[1]),
       reaction: await validateReaction(msg, args[2]),
@@ -97,12 +103,49 @@ export class Command implements CommandInterface {
     };
 
     const isValid = [
-      validations.channel.valid,
-      validations.message.valid,
-      validations.reaction.valid,
-      validations.role.valid
+      this.validations.channel.valid,
+      this.validations.message.valid,
+      this.validations.reaction.valid,
+      this.validations.role.valid
     ].every(cond => cond);
 
+    return isValid;
+  }
+
+  public async guard(): Promise<void> {
+    //
+  }
+
+  public async run(ctx: Instance, msg: Message, args: string[]): Promise<void> {
+    const isValid = await this.check(ctx, msg, args);
+
+    if (!isValid) {
+      const invalidEmbed = await this.buildEmbed(args, isValid);
+      msg.channel.send(invalidEmbed);
+      return;
+    }
+
+    console.log("ran addrole");
+
+    const channel = args[0];
+    const messageId = args[1];
+    const reaction = args[2];
+    const role: string = args[3];
+
+    const id = await ctx.reactionCollector.add(ctx, {
+      guildId: msg.guild.id,
+      channelId: extractIdFromMention(channel),
+      messageId,
+      reaction,
+      roleId: extractIdFromMention(role),
+      authorId: msg.author.id
+    });
+
+    const validEmbed = await this.buildEmbed(args, isValid, id);
+    msg.channel.send(validEmbed);
+  }
+
+  private async buildEmbed(args: string[], isValid: boolean, createdId?: string): Promise<MessageEmbed> {
     let headerField: EmbedField[] = [];
     if (args.length !== 4) {
       headerField = [
@@ -118,60 +161,38 @@ export class Command implements CommandInterface {
           value: "Invalid arguments, validate below"
         }
       ];
+    } else {
+      headerField = [
+        {
+          name: "Success",
+          value: `Created reaction role with id \`${createdId}\``
+        }
+      ];
     }
 
     const validatedFields: EmbedField[] = [
       {
         name: "1- Channel",
-        value: validations.channel.message
+        value: this.validations.channel.message
       },
       {
         name: "2- Message",
-        value: validations.message.message
+        value: this.validations.message.message
       },
       {
         name: "3- Reaction",
-        value: validations.reaction.message
+        value: this.validations.reaction.message
       },
       {
         name: "4- Role",
-        value: validations.role.message
+        value: this.validations.role.message
       }
     ];
 
-    msg.channel.send(
-      new MessageEmbed({
-        fields: [...headerField, ...validatedFields]
-      })
-    );
-
-    return isValid;
-  }
-
-  public async guard(): Promise<void> {
-    //
-  }
-
-  public async run(ctx: Instance, msg: Message, args: string[]): Promise<void> {
-    const isValid = await this.check(ctx, msg, args);
-    if (!isValid) {
-      return;
-    }
-
-    console.log("ran addrole");
-
-    const channel = args[0];
-    const messageId = args[1];
-    const reaction = args[2];
-    const role: string = args[3];
-
-    await ctx.reactionCollector.add(ctx, {
-      guildId: msg.guild.id,
-      channelId: extractIdFromMention(channel),
-      messageId,
-      reaction,
-      roleId: extractIdFromMention(role),
-      authorId: msg.author.id
+    const embed = new MessageEmbed({
+      fields: [...headerField, ...validatedFields]
     });
+
+    return embed;
   }
 }

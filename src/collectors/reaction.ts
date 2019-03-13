@@ -1,4 +1,5 @@
 import { Client, Guild, GuildMember, Message, MessageReaction, ReactionCollector, TextChannel, User } from "discord.js";
+import { MongooseDocument } from "mongoose";
 import { Instance } from "../Instance";
 import { WatchedMessageDocument, WatchedMessageModel } from "../models/WatchedMessage";
 
@@ -45,7 +46,7 @@ export class ReactionCollectorHelper {
       roleId: string;
       authorId: string;
     }
-  ): Promise<void> {
+  ): Promise<MongooseDocument["_id"] | void> {
     const query = {
       guildId: message.guildId,
       channelId: message.channelId,
@@ -58,7 +59,11 @@ export class ReactionCollectorHelper {
     if (result) {
       this.watched = [...this.watched, result];
       this.setup(ctx, result);
+
+      return result._id;
     }
+
+    return;
   }
 
   public async remove(
