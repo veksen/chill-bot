@@ -16,7 +16,7 @@ import { Instance } from "./Instance";
     return console.log("MONGO_PATH is not set.");
   }
 
-  mongoose.connect(MONGO_PATH, { useNewUrlParser: true });
+  mongoose.connect(MONGO_PATH, { useNewUrlParser: true }).catch(console.log);
 
   const client = new Client({ disableEveryone: true });
   const instance = new Instance();
