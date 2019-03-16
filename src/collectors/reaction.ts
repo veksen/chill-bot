@@ -175,7 +175,7 @@ export class ReactionCollectorHelper {
 
     // then update collectors with the newly created one
     this.collectors = [
-      ...this.collectors,
+      ...this.collectors.filter(c => c.id !== message.id),
       {
         id: message.id,
         collector
