@@ -112,11 +112,28 @@ export class Command implements CommandInterface {
     return isValid;
   }
 
-  public async guard(): Promise<void> {
-    //
+  public async guard(_: Instance, msg: Message): Promise<void> {
+    const allowedChannels = [
+      "382642615952211970", // chillhop
+      "544291635165528094", // Tele
+      "548421804943998976" // v
+    ];
+
+    const channelIsAllowed = allowedChannels.includes(msg.channel.id);
+
+    if (!channelIsAllowed) {
+      throw new Error("Not allowed in this channel");
+    }
   }
 
   public async run(ctx: Instance, msg: Message, args: string[]): Promise<void> {
+    try {
+      await this.guard(ctx, msg);
+    } catch (e) {
+      console.log(e.message);
+      return;
+    }
+
     const isValid = await this.check(ctx, msg, args);
 
     if (!isValid) {
