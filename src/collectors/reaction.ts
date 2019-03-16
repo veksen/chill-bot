@@ -163,13 +163,13 @@ export class ReactionCollectorHelper {
       { dispose: true }
     );
     collector
-      .on("collect", async (role: MessageReaction, user: User) => {
+      .on("collect", async (r: MessageReaction, user: User) => {
         const member = await getGuildMember(ctx.bot, message.guildId, user).catch(console.log);
         if (!member || member.user.bot) {
           return;
         }
         member.roles.add(message.roleId).catch(console.log);
-        console.log(`Collected ${role.emoji.name}`);
+        console.log(`Collected ${r.emoji.name}`);
       })
       .on("remove", async (r: MessageReaction, user: User) => {
         const member = await getGuildMember(ctx.bot, message.guildId, user).catch(console.log);
