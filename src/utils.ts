@@ -2,6 +2,10 @@ export const extractIdFromMention = (mention: string): string => {
   return mention.replace(/\D/g, "");
 };
 
+export const extractIdFromCustomEmoji = (emoji: string): string => {
+  return emoji.replace(/^<:.+:(\d+)>$/, "$1");
+};
+
 export const isChannelMention = (maybeChannelMention: string): boolean => {
   return Boolean(maybeChannelMention.match(/^<#\d+>$/));
 };

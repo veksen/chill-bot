@@ -2,6 +2,7 @@ import { Client, Guild, GuildMember, Message, MessageReaction, ReactionCollector
 import { MongooseDocument } from "mongoose";
 import { Instance } from "../Instance";
 import { WatchedMessageDocument, WatchedMessageModel } from "../models/WatchedMessage";
+import { extractIdFromCustomEmoji } from "../utils";
 
 const getGuildMember = async (client: Client, guildId: Guild["id"], user: User): Promise<GuildMember | void> => {
   const u = await user.fetch().catch(console.log);
@@ -98,7 +99,7 @@ export class ReactionCollectorHelper {
       return;
     }
     const isCustom = isCustomEmoji(message.reaction);
-    const emoji = isCustom ? guild.emojis.get(message.reaction.replace(/^<:.+:(\d+)>$/, "$1")) : message.reaction;
+    const emoji = isCustom ? guild.emojis.get(extractIdFromCustomEmoji(message.reaction)) : message.reaction;
     if (emoji) {
       watched.react(emoji).catch(console.log);
     } else {
@@ -113,7 +114,7 @@ export class ReactionCollectorHelper {
       return;
     }
     const isCustom = isCustomEmoji(message.reaction);
-    const emoji = isCustom ? guild.emojis.get(message.reaction.replace(/^<:.+:(\d+)>$/, "$1")) : message.reaction;
+    const emoji = isCustom ? guild.emojis.get(extractIdFromCustomEmoji(message.reaction)) : message.reaction;
     if (emoji) {
       await watched.reactions
         .filter(reaction => {
@@ -156,7 +157,7 @@ export class ReactionCollectorHelper {
     const collector = watched.createReactionCollector(
       (reaction: MessageReaction) => {
         const isCustom = isCustomEmoji(message.reaction);
-        const customMatch = isCustom && message.reaction.replace(/^<:.+:(\d+)>$/, "$1") === reaction.emoji.id;
+        const customMatch = isCustom && extractIdFromCustomEmoji(message.reaction) === reaction.emoji.id;
         return reaction.emoji.name === message.reaction || customMatch;
       },
       { dispose: true }
