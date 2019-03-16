@@ -20,6 +20,10 @@ const getMessageFromChannel = async (client: Client, message: WatchedMessageDocu
   return channel.messages.fetch(message.messageId);
 };
 
+const isCustomEmoji = (reaction: WatchedMessageDocument["reaction"]): boolean => {
+  return Boolean(reaction.match(/^<:.+:\d+>$/));
+};
+
 interface KeyedReactionCollector {
   id: string;
   collector: ReactionCollector;
@@ -93,8 +97,8 @@ export class ReactionCollectorHelper {
     if (!watched) {
       return;
     }
-    const isCustomEmoji = message.reaction.match(/^<:.+:\d+>$/);
-    const emoji = isCustomEmoji ? guild.emojis.get(message.reaction.replace(/\D/g, "")) : message.reaction;
+    const isCustom = isCustomEmoji(message.reaction);
+    const emoji = isCustom ? guild.emojis.get(message.reaction.replace(/\D/g, "")) : message.reaction;
     if (emoji) {
       watched.react(emoji).catch(console.log);
     } else {
@@ -108,8 +112,8 @@ export class ReactionCollectorHelper {
     if (!watched) {
       return;
     }
-    const isCustomEmoji = message.reaction.match(/^<:.+:\d+>$/);
-    const emoji = isCustomEmoji ? guild.emojis.get(message.reaction.replace(/\D/g, "")) : message.reaction;
+    const isCustom = isCustomEmoji(message.reaction);
+    const emoji = isCustom ? guild.emojis.get(message.reaction.replace(/\D/g, "")) : message.reaction;
     if (emoji) {
       await watched.reactions
         .filter(reaction => {
