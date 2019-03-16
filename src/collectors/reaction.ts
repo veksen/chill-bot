@@ -158,7 +158,7 @@ export class ReactionCollectorHelper {
     collector
       .on("collect", async (role: MessageReaction, user: User) => {
         const member = await getGuildMember(ctx.bot, message.guildId, user).catch(console.log);
-        if (!member) {
+        if (!member || member.user.bot) {
           return;
         }
         member.roles.add(message.roleId).catch(console.log);
@@ -166,7 +166,7 @@ export class ReactionCollectorHelper {
       })
       .on("remove", async (r: MessageReaction, user: User) => {
         const member = await getGuildMember(ctx.bot, message.guildId, user).catch(console.log);
-        if (!member) {
+        if (!member || member.user.bot) {
           return;
         }
         member.roles.remove(message.roleId).catch(console.log);
