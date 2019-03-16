@@ -155,7 +155,9 @@ export class ReactionCollectorHelper {
     }
     const collector = watched.createReactionCollector(
       (reaction: MessageReaction) => {
-        return reaction.emoji.name === message.reaction;
+        const isCustom = isCustomEmoji(message.reaction);
+        const customMatch = isCustom && message.reaction.replace(/\D/g, "") === reaction.emoji.id;
+        return reaction.emoji.name === message.reaction || customMatch;
       },
       { dispose: true }
     );
