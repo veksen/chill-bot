@@ -59,6 +59,8 @@ export class Command implements CommandInterface {
   };
 
   public async run(ctx: Instance, msg: Message, args: string[]): Promise<void> {
+    console.log("command attempted: post");
+
     try {
       await this.guard(ctx, msg);
     } catch (e) {
@@ -68,12 +70,11 @@ export class Command implements CommandInterface {
 
     const isValid = await this.check(ctx, msg, args);
     if (!isValid) {
+      console.log("command invalid: post");
       const invalidEmbed = await this.buildEmbed(args, isValid);
       msg.channel.send(invalidEmbed);
       return;
     }
-
-    console.log("ran post");
 
     const channelToSend = getChannel(msg, args[0]);
     const messageToSend = extractContent(msg, args[0]);
@@ -82,6 +83,8 @@ export class Command implements CommandInterface {
 
     const validEmbed = await this.buildEmbed(args, isValid, channelToSend);
     msg.channel.send(validEmbed);
+
+    console.log("command ran: post");
   }
 
   public async check(_: Instance, msg: Message, args: string[]): Promise<boolean> {

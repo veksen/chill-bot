@@ -127,6 +127,8 @@ export class Command implements CommandInterface {
   }
 
   public async run(ctx: Instance, msg: Message, args: string[]): Promise<void> {
+    console.log("command attempted: run");
+
     try {
       await this.guard(ctx, msg);
     } catch (e) {
@@ -137,12 +139,11 @@ export class Command implements CommandInterface {
     const isValid = await this.check(ctx, msg, args);
 
     if (!isValid) {
+      console.log("command invalid: run");
       const invalidEmbed = await this.buildEmbed(args, isValid);
       msg.channel.send(invalidEmbed);
       return;
     }
-
-    console.log("ran addrole");
 
     const channel = args[0];
     const messageId = args[1];
@@ -160,6 +161,8 @@ export class Command implements CommandInterface {
 
     const validEmbed = await this.buildEmbed(args, isValid, id);
     msg.channel.send(validEmbed);
+
+    console.log("command ran: run");
   }
 
   private async buildEmbed(args: string[], isValid: boolean, createdId?: string): Promise<MessageEmbed> {

@@ -23,6 +23,8 @@ export class Command implements CommandInterface {
   public aliases = ["deleterole"];
 
   public async run(ctx: Instance, msg: Message, args: string[]): Promise<void> {
+    console.log("command attempted: removerole");
+
     try {
       await this.guard(ctx, msg);
     } catch (e) {
@@ -32,10 +34,9 @@ export class Command implements CommandInterface {
 
     const isValid = await this.check(ctx, msg, args);
     if (!isValid) {
+      console.log("command invalid: removerole");
       return;
     }
-
-    console.log("ran removerole");
 
     const id = args[0];
 
@@ -44,6 +45,8 @@ export class Command implements CommandInterface {
         id
       })
       .catch(console.log);
+
+    console.log("command ran: removerole");
   }
 
   public async check(_: Instance, msg: Message, args: string[]): Promise<boolean> {
