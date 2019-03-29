@@ -97,7 +97,8 @@ export class Command implements CommandInterface {
     const allowedChannels = [
       "382642615952211970", // chillhop
       "544291635165528094", // Tele
-      "548421804943998976" // v
+      "548421804943998976", // v
+      "561031623202832405" // hm
     ];
 
     const channelIsAllowed = allowedChannels.includes(msg.channel.id);
