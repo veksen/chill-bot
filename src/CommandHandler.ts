@@ -45,14 +45,14 @@ export class CommandHandler implements CommandHandlerInterface {
     });
 
     if (!found) {
-      this.invalidCommand(msg);
+      this.invalidCommand(cmd);
       return;
     }
 
     found.run(ctx, msg, this.current.arguments);
   }
 
-  private invalidCommand(msg: Discord.Message): Promise<Discord.Message | Discord.Message[]> {
-    return msg.channel.send("Invalid command");
+  private invalidCommand(cmd: string): void {
+    console.log(`Invalid command: ${cmd}`);
   }
 }
