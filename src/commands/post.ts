@@ -79,7 +79,11 @@ export class Command implements CommandInterface {
     const channelToSend = getChannel(msg, args[0]);
     const messageToSend = extractContent(msg, args[0]);
 
-    channelToSend.send(messageToSend);
+    const options = {
+      files: msg.attachments.array().map(attachment => attachment.url)
+    };
+
+    channelToSend.send(messageToSend, options);
 
     const validEmbed = await this.buildEmbed(args, isValid, channelToSend);
     msg.channel.send(validEmbed);
