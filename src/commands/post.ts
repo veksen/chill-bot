@@ -119,7 +119,7 @@ export class Command implements CommandInterface {
 
   private async buildEmbed(args: string[], isValid: boolean, channel?: TextChannel): Promise<MessageEmbed> {
     let headerField: EmbedField[] = [];
-    if (args.length !== 2) {
+    if (args.length <= 2) {
       headerField = [
         {
           name: "Invalid",
