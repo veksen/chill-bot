@@ -4,6 +4,7 @@ import { PREFIX } from "./config";
 
 import { ReactionCollectorHelper } from "./collectors/reaction";
 import { CommandHandler } from "./CommandHandler";
+import { ChannelWatcher } from "./watchers/channel";
 
 interface InstanceInterface {
   bot?: Discord.Client;
@@ -16,6 +17,7 @@ export class Instance implements InstanceInterface {
   public prefix: string;
   public handler: CommandHandler;
   public reactionCollector: ReactionCollectorHelper;
+  public channelWatcher: ChannelWatcher;
 
   public async init(bot: Discord.Client): Promise<Instance | void> {
     this.bot = bot;
@@ -24,6 +26,7 @@ export class Instance implements InstanceInterface {
     const handler = new CommandHandler();
     this.handler = await handler.init();
     this.reactionCollector = new ReactionCollectorHelper();
+    this.channelWatcher = new ChannelWatcher();
 
     return this;
   }

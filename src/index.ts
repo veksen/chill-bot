@@ -31,11 +31,14 @@ import { Instance } from "./Instance";
   client.on("ready", () => {
     console.log("Bot is ready!");
     bot.reactionCollector.init(bot).catch(console.log);
+    bot.channelWatcher.init(bot).catch(console.log);
   });
   client.on("disconnect", () => console.log("Bot disconnected!"));
   client.on("reconnecting", () => console.log("Bot reconnecting!"));
 
   client.on("message", async message => {
+    bot.channelWatcher.run(bot, message);
+
     if (message.author.bot) {
       return undefined;
     }
