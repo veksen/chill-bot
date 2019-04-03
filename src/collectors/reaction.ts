@@ -154,6 +154,12 @@ export class ReactionCollectorHelper {
     if (!hasReactionByMe) {
       this.addReaction(ctx, message);
     }
+    const withGuildMember = async (user: User, f: (member: GuildMember) => void): Promise<void> => {
+      const member = await getGuildMember(ctx.bot, message.guildId, user).catch(console.log);
+      if (member && !member.user.bot) {
+        f(member);
+      }
+    };
     const collector = watched.createReactionCollector(
       (reaction: MessageReaction) => {
         const isCustom = isCustomEmoji(message.reaction);
@@ -164,20 +170,16 @@ export class ReactionCollectorHelper {
     );
     collector
       .on("collect", async (r: MessageReaction, user: User) => {
-        const member = await getGuildMember(ctx.bot, message.guildId, user).catch(console.log);
-        if (!member || member.user.bot) {
-          return;
-        }
-        member.roles.add(message.roleId).catch(console.log);
-        console.log(`Collected ${r.emoji.name}`);
+        withGuildMember(user, member => {
+          member.roles.add(message.roleId).catch(console.log);
+          console.log(`Collected ${r.emoji.name}`);
+        });
       })
       .on("remove", async (r: MessageReaction, user: User) => {
-        const member = await getGuildMember(ctx.bot, message.guildId, user).catch(console.log);
-        if (!member || member.user.bot) {
-          return;
-        }
-        member.roles.remove(message.roleId).catch(console.log);
-        console.log(`Removed ${r.emoji.name}`);
+        withGuildMember(user, member => {
+          member.roles.remove(message.roleId).catch(console.log);
+          console.log(`Removed ${r.emoji.name}`);
+        });
       });
 
     // then update collectors with the newly created one
