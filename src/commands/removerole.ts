@@ -1,4 +1,5 @@
 import { EmbedField, Message, MessageEmbed } from "discord.js";
+import { allowedChannels } from "../allowedChannels";
 import { CommandInterface } from "../Command";
 import { Instance } from "../Instance";
 import { WatchedMessageModel } from "../models/WatchedMessage";
@@ -94,14 +95,6 @@ export class Command implements CommandInterface {
   }
 
   public async guard(_: Instance, msg: Message): Promise<void> {
-    const allowedChannels = [
-      "382642615952211970", // chillhop
-      "544291635165528094", // Tele
-      "548421804943998976", // v
-      "561031623202832405", // hm
-      "581169092887576586" // council
-    ];
-
     const channelIsAllowed = allowedChannels.includes(msg.channel.id);
 
     if (!channelIsAllowed) {
