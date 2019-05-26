@@ -74,8 +74,8 @@ export class Command implements CommandInterface {
       },
       ...options
     })) as Message;
-    await sentMessage.react("👍");
-    await sentMessage.react("👎");
+    await sentMessage.react("✅");
+    await sentMessage.react("❌");
     await msg.delete();
 
     await SuggestionModel.create({
