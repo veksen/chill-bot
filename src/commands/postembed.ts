@@ -64,7 +64,7 @@ export class Command implements CommandInterface {
   };
 
   public async run(ctx: Instance, msg: Message, args: string[]): Promise<void> {
-    console.log("command attempted: postembed");
+    console.log(`command attempted: ${this.name}`);
 
     try {
       await this.guard(ctx, msg);
@@ -75,7 +75,7 @@ export class Command implements CommandInterface {
 
     const isValid = await this.check(ctx, msg, args);
     if (!isValid) {
-      console.log("command invalid: postembed");
+      console.log(`command invalid: ${this.name}`);
       const invalidEmbed = await this.buildEmbed(args, isValid);
       msg.channel.send(invalidEmbed);
       return;
@@ -103,7 +103,7 @@ export class Command implements CommandInterface {
     const validEmbed = await this.buildEmbed(args, isValid, channelToSend);
     msg.channel.send(validEmbed);
 
-    console.log("command ran: postembed");
+    console.log(`command ran: ${this.name}`);
   }
 
   public async check(_: Instance, msg: Message, args: string[]): Promise<boolean> {
